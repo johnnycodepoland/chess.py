@@ -21,7 +21,7 @@ selected_square = None
 
 board = {
     (0, 0): "black_rook",
-    (0, 1): "black_knight",
+    (1, 0): "black_knight",
     (2, 0): "black_bishop",
     (3, 0): "black_queen",
     (4, 0): "black_king",
@@ -93,15 +93,25 @@ while running:
         elif selected_square in board and (board[selected_square] == "white_rook" or board[selected_square] == "black_rook") and second_square not in board:
             # Tutaj sprawdzamy czy wiersz lub kolumna zgadza się z pozycją wierzy
             col2, row2 = second_square
-            # Tutaj iterujemy sobie przez wszystkie pola między wierzą a punktem docelowym
-            if col == col2 or row == row2:
-                for c in range(col + 1, col2):
+            # Tutaj iterujemy sobie przez wszystkie pola między wierzą a punktem docelowym, najpierw w przypadku kiedy ruch ma się odbyć w prawo lub w lewo
+            if col == col2:
+                for c in range(min(col, col2) +1, max(col, col2)):
                     if (c, row) in board:
                         break
                 else:
                     piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
                     board[second_square] = board[selected_square]
                     del board[selected_square]
+            # Tu analizujemy opcję w której wierza porusza się w górę lub w dół
+            elif row == row2:
+                for c in range(min(row, row2) +1, max(row, row2)):
+                    if (col, c) in board:
+                        break
+                else:
+                    piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
+                    board[second_square] = board[selected_square]
+                    del board[selected_square]
+    # Tutaj renderujemy wszystkie figury
     for i in board:
         col, row = i
         piece.draw(screen, board[i], (col * 80, row * 80))
