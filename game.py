@@ -111,6 +111,13 @@ while running:
                     piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
                     board[second_square] = board[selected_square]
                     del board[selected_square]
+        # Logika skoczka
+        elif selected_square in board and (board[selected_square] == "white_knight" or board[selected_square] == "black_knight") and second_square not in board:
+            col2, row2 = second_square
+            if (col2, row2) == (col +2, row +1) or (col2, row2) == (col +2, row -1) or (col2, row2) == (col + 1, row +2) or (col2, row2) == (col-1, row +2) or (col2, row2) == (col +1, row -2) or (col2, row2) == (col-1, row -2) or (col2, row2) == (col-2, row +1) or (col2, row2) == (col-2, row -1):
+                piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
+                board[second_square] = board[selected_square]
+                del board[selected_square]
     # Tutaj renderujemy wszystkie figury
     for i in board:
         col, row = i
