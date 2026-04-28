@@ -118,6 +118,15 @@ while running:
                 piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
                 board[second_square] = board[selected_square]
                 del board[selected_square]
+        # Logika gońca
+        elif selected_square in board and (board[selected_square] == "white_bishop" or board[selected_square] == "black_bishop") and second_square not in board:
+            col2, row2 = second_square
+            # Tutaj korzystamy a funkcji abs(x) która podaję nam wartość bezwzględną danej liczby, co w tym przypadku wykorzystujemy do obliczenia wartości bezwzględnej z różnicy col2 - col1 i row2 - row, co pozwala nam potem sprawdzić czy ich róznica jest sobie równa
+            if abs(col2 - col) == abs(row2 - row):
+                piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
+                board[second_square] = board[selected_square]
+                del board[selected_square]
+
     # Tutaj renderujemy wszystkie figury
     for i in board:
         col, row = i
