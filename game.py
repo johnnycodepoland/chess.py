@@ -76,6 +76,7 @@ while running:
         col, row = selected_square
         rect = pygame.Rect(col * 80, row * 80, 80, 80)
         pygame.draw.rect(screen, (255, 0, 0), rect, 3)
+
         # Logika pionka
         if selected_square in board and (board[selected_square] == "white_pawn" or board[selected_square] == "black_pawn") and second_square not in board:
             # Tutaj analizujemy dwa przypadki jeden dla białego drugi dla czarnego pionka
@@ -93,9 +94,10 @@ while running:
         elif selected_square in board and (board[selected_square] == "white_rook" or board[selected_square] == "black_rook") and second_square not in board:
             # Tutaj sprawdzamy czy wiersz lub kolumna zgadza się z pozycją wierzy
             col2, row2 = second_square
+
             # Tutaj iterujemy sobie przez wszystkie pola między wierzą a punktem docelowym, najpierw w przypadku kiedy ruch ma się odbyć w prawo lub w lewo
             if col == col2:
-                for c in range(min(col, col2) +1, max(col, col2)):
+                for c in range(min(row, row2) +1, max(row, row2)):
                     if (c, row) in board:
                         break
                 else:
@@ -104,7 +106,7 @@ while running:
                     del board[selected_square]
             # Tu analizujemy opcję w której wierza porusza się w górę lub w dół
             elif row == row2:
-                for c in range(min(row, row2) +1, max(row, row2)):
+                for c in range(min(col, col2) +1, max(col, col2)):
                     if (col, c) in board:
                         break
                 else:
@@ -114,6 +116,7 @@ while running:
         # Logika skoczka
         elif selected_square in board and (board[selected_square] == "white_knight" or board[selected_square] == "black_knight") and second_square not in board:
             col2, row2 = second_square
+
             if (col2, row2) == (col +2, row +1) or (col2, row2) == (col +2, row -1) or (col2, row2) == (col + 1, row +2) or (col2, row2) == (col-1, row +2) or (col2, row2) == (col +1, row -2) or (col2, row2) == (col-1, row -2) or (col2, row2) == (col-2, row +1) or (col2, row2) == (col-2, row -1):
                 piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
                 board[second_square] = board[selected_square]
@@ -121,11 +124,41 @@ while running:
         # Logika gońca
         elif selected_square in board and (board[selected_square] == "white_bishop" or board[selected_square] == "black_bishop") and second_square not in board:
             col2, row2 = second_square
-            # Tutaj korzystamy a funkcji abs(x) która podaję nam wartość bezwzględną danej liczby, co w tym przypadku wykorzystujemy do obliczenia wartości bezwzględnej z różnicy col2 - col1 i row2 - row, co pozwala nam potem sprawdzić czy ich róznica jest sobie równa
+            # Tutaj obliczmy sobię kierunek ruchu
+            d_col = (col2 - col) // abs(col2 - col)
+            d_row = (row2 - row) // abs(row2 - row)
+
+            # Tutaj korzystamy z funkcji abs(x) która podaję nam wartość bezwzględną danej liczby, co w tym przypadku wykorzystujemy do obliczenia wartości bezwzględnej z różnicy col2 - col1 i row2 - row, co pozwala nam potem sprawdzić czy ich róznica jest sobie równa
             if abs(col2 - col) == abs(row2 - row):
-                piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
-                board[second_square] = board[selected_square]
-                del board[selected_square]
+                for c, r in zip(range(col + d_col, col2, d_col), range(row + d_row, row2, d_row)):
+                    if (c, r) in board:
+                        break
+                else:
+                    piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
+                    board[second_square] = board[selected_square]
+                    del board[selected_square]
+        # Logika hetmana
+        elif selected_square in board and(board[selected_square] == "white_queen" or board[selected_square] == "black_queen") and second_square not in board:
+            col2, row2 = second_square
+
+            if abs(col2 - col) == abs(row2 - row):
+                d_col = (col2 - col) // abs(col2 - col)
+                d_row = (row2 - row) // abs(row2 - row)
+                for c, r in zip(range(col + d_col, col2, d_col), range(row + d_row, row2, d_row)):
+                    if (c, r) in board:
+                        break
+                else:
+                    piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
+                    board[second_square] = board[selected_square]
+                    del board[selected_square]
+            elif row == row2:
+                for c in range(min(col, col2) + 1, max(col, col2)):
+                    if (col, c) in board:
+                        break
+                else:
+                    piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
+                    board[second_square] = board[selected_square]
+                    del board[selected_square]
 
     # Tutaj renderujemy wszystkie figury
     for i in board:
