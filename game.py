@@ -98,7 +98,7 @@ while running:
             # Tutaj iterujemy sobie przez wszystkie pola między wierzą a punktem docelowym, najpierw w przypadku kiedy ruch ma się odbyć w prawo lub w lewo
             if col == col2:
                 for c in range(min(row, row2) +1, max(row, row2)):
-                    if (c, row) in board:
+                    if (col, c) in board:
                         break
                 else:
                     piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
@@ -107,7 +107,7 @@ while running:
             # Tu analizujemy opcję w której wierza porusza się w górę lub w dół
             elif row == row2:
                 for c in range(min(col, col2) +1, max(col, col2)):
-                    if (col, c) in board:
+                    if (c, row) in board:
                         break
                 else:
                     piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
@@ -128,8 +128,9 @@ while running:
             d_col = (col2 - col) // abs(col2 - col)
             d_row = (row2 - row) // abs(row2 - row)
 
-            # Tutaj korzystamy z funkcji abs(x) która podaję nam wartość bezwzględną danej liczby, co w tym przypadku wykorzystujemy do obliczenia wartości bezwzględnej z różnicy col2 - col1 i row2 - row, co pozwala nam potem sprawdzić czy ich róznica jest sobie równa
+            # Tutaj korzystamy z funkcji abs(x) która podaję nam wartość bezwzględną danej liczby, co w tym przypadku wykorzystujemy do obliczenia wartości bezwzględnej z różnicy col2 - col1 i row2 - row, co pozwala nam potem sprawdzić czy ich różnica jest sobie równa
             if abs(col2 - col) == abs(row2 - row):
+                # Tutaj iterujemy sobie przez wszystkie pola między polem docelowym a startowym, z wykorzystaniem funkcji zip, która łaczy nam iterowalne elementy, w tym przypadku pierwsza wartość to punkt startowy + kierunek kolumny, druga wartość to punkt końcowy a trzecia, to o ile się poruszamy, analogiczną sytuację mamy w rzędach
                 for c, r in zip(range(col + d_col, col2, d_col), range(row + d_row, row2, d_row)):
                     if (c, r) in board:
                         break
@@ -159,6 +160,15 @@ while running:
                     piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
                     board[second_square] = board[selected_square]
                     del board[selected_square]
+            elif col == col2:
+                for c in range(min(row, row2) + 1, max(row, row2)):
+                    if (c, row) in board:
+                        break
+                else:
+                    piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
+                    board[second_square] = board[selected_square]
+                    del board[selected_square]
+
 
     # Tutaj renderujemy wszystkie figury
     for i in board:
