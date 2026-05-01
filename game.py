@@ -84,7 +84,7 @@ while running:
                 direction = -1
             else:
                 direction = 1
-            # Tutaj również analizujemy dwa przypadki jeden dla ruchu startowego o 2, a takżę ten normalny
+            # Tutaj również analizujemy dwa przypadki jeden dla ruchu startowego o 2 pola, a także ten standardowy o 1 pole
             if second_square == (col, row + direction) or (second_square == (col, row + direction * 2) and (row == 6 or row == 1) and (col, row + direction) not in board):
                 col, row = second_square
                 piece.draw(screen, board[selected_square], (col * 80, row * 80))
@@ -139,7 +139,7 @@ while running:
                     board[second_square] = board[selected_square]
                     del board[selected_square]
         # Logika hetmana
-        elif selected_square in board and(board[selected_square] == "white_queen" or board[selected_square] == "black_queen") and second_square not in board:
+        elif selected_square in board and (board[selected_square] == "white_queen" or board[selected_square] == "black_queen") and second_square not in board:
             col2, row2 = second_square
 
             if abs(col2 - col) == abs(row2 - row):
@@ -168,7 +168,14 @@ while running:
                     piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
                     board[second_square] = board[selected_square]
                     del board[selected_square]
+        # Logika króla
+        elif selected_square in board and (board[selected_square] == "white_king" or board[selected_square] == "black_king") and second_square not in board:
+            col2, row2 = second_square
 
+            if (col2, row2) == (col, row +1) or (col2, row2) == (col +1, row +1) or (col2, row2) == (col +1, row) or (col2, row2) == (col +1, row -1) or (col2, row2) == (col, row -1) or (col2, row2) == (col-1, row -1) or (col2, row2) == (col-1, row) or (col2, row2) == (col-1, row +1):
+                piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
+                board[second_square] = board[selected_square]
+                del board[selected_square]
 
     # Tutaj renderujemy wszystkie figury
     for i in board:
