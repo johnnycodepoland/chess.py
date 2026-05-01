@@ -154,7 +154,7 @@ while running:
                     del board[selected_square]
             elif row == row2:
                 for c in range(min(col, col2) + 1, max(col, col2)):
-                    if (col, c) in board:
+                    if (c, row) in board:
                         break
                 else:
                     piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
@@ -162,7 +162,7 @@ while running:
                     del board[selected_square]
             elif col == col2:
                 for c in range(min(row, row2) + 1, max(row, row2)):
-                    if (c, row) in board:
+                    if (col, c) in board:
                         break
                 else:
                     piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
