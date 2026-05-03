@@ -63,6 +63,7 @@ while running:
     screen.fill((0, 0, 0))
     # Tło ekranu
     screen.blit(background, (0, 0))
+
     # Tutaj mamy pętle która zaczyna się od sprawdzenia czy użytkownik używa lewego przycisky myszy
     if utils.left_click_event():
         if start_square is None:
@@ -78,20 +79,25 @@ while running:
         pygame.draw.rect(screen, (255, 0, 0), rect, 3)
 
         # Logika pionka
-        if selected_square in board and (board[selected_square] == "white_pawn" or board[selected_square] == "black_pawn") and second_square not in board:
+        if selected_square in board and (board[selected_square] == "white_pawn" or board[selected_square] == "black_pawn"):
             # Tutaj analizujemy dwa przypadki jeden dla białego drugi dla czarnego pionka
             if board[selected_square] == "white_pawn":
                 direction = -1
             else:
                 direction = 1
             # Tutaj również analizujemy dwa przypadki jeden dla ruchu startowego o 2 pola, a także ten standardowy o 1 pole
-            if second_square == (col, row + direction) or (second_square == (col, row + direction * 2) and (row == 6 or row == 1) and (col, row + direction) not in board):
+            if (second_square == (col, row + direction) or (second_square == (col, row + direction * 2) and (row == 6 or row == 1) and (col, row + direction) not in board)) and second_square not in board:
+                col, row = second_square
+                piece.draw(screen, board[selected_square], (col * 80, row * 80))
+                board[second_square] = board[selected_square]
+                del board[selected_square]
+            elif ((second_square == (col +1, row + direction)) or (second_square == (col -1, row + direction))) and (second_square in board) and not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square])):
                 col, row = second_square
                 piece.draw(screen, board[selected_square], (col * 80, row * 80))
                 board[second_square] = board[selected_square]
                 del board[selected_square]
         # Logika wierzy
-        elif selected_square in board and (board[selected_square] == "white_rook" or board[selected_square] == "black_rook") and second_square not in board:
+        elif selected_square in board and (board[selected_square] == "white_rook" or board[selected_square] == "black_rook") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
             # Tutaj sprawdzamy czy wiersz lub kolumna zgadza się z pozycją wierzy
             col2, row2 = second_square
 
@@ -114,7 +120,7 @@ while running:
                     board[second_square] = board[selected_square]
                     del board[selected_square]
         # Logika skoczka
-        elif selected_square in board and (board[selected_square] == "white_knight" or board[selected_square] == "black_knight") and second_square not in board:
+        elif selected_square in board and (board[selected_square] == "white_knight" or board[selected_square] == "black_knight") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
             col2, row2 = second_square
 
             if (col2, row2) == (col +2, row +1) or (col2, row2) == (col +2, row -1) or (col2, row2) == (col + 1, row +2) or (col2, row2) == (col-1, row +2) or (col2, row2) == (col +1, row -2) or (col2, row2) == (col-1, row -2) or (col2, row2) == (col-2, row +1) or (col2, row2) == (col-2, row -1):
@@ -122,7 +128,7 @@ while running:
                 board[second_square] = board[selected_square]
                 del board[selected_square]
         # Logika gońca
-        elif selected_square in board and (board[selected_square] == "white_bishop" or board[selected_square] == "black_bishop") and second_square not in board:
+        elif selected_square in board and (board[selected_square] == "white_bishop" or board[selected_square] == "black_bishop") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
             col2, row2 = second_square
             # Tutaj obliczmy sobię kierunek ruchu
             d_col = (col2 - col) // abs(col2 - col)
@@ -139,7 +145,7 @@ while running:
                     board[second_square] = board[selected_square]
                     del board[selected_square]
         # Logika hetmana
-        elif selected_square in board and (board[selected_square] == "white_queen" or board[selected_square] == "black_queen") and second_square not in board:
+        elif selected_square in board and (board[selected_square] == "white_queen" or board[selected_square] == "black_queen") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
             col2, row2 = second_square
 
             if abs(col2 - col) == abs(row2 - row):
@@ -169,7 +175,7 @@ while running:
                     board[second_square] = board[selected_square]
                     del board[selected_square]
         # Logika króla
-        elif selected_square in board and (board[selected_square] == "white_king" or board[selected_square] == "black_king") and second_square not in board:
+        elif selected_square in board and (board[selected_square] == "white_king" or board[selected_square] == "black_king") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
             col2, row2 = second_square
 
             if (col2, row2) == (col, row +1) or (col2, row2) == (col +1, row +1) or (col2, row2) == (col +1, row) or (col2, row2) == (col +1, row -1) or (col2, row2) == (col, row -1) or (col2, row2) == (col-1, row -1) or (col2, row2) == (col-1, row) or (col2, row2) == (col-1, row +1):
