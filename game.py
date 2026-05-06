@@ -70,16 +70,22 @@ while running:
     # Tutaj mamy pętle która zaczyna się od sprawdzenia czy użytkownik używa lewego przycisky myszy
     if utils.left_click_event():
         if start_square is None:
-            start_square = utils.get_cords_under_mouse()
+            start_square = utils.get_cords_under_mouse(current_turn)
         else:
             # Tutaj zapisujemy sobie koordynaty myszy
-            second_square = utils.get_cords_under_mouse()
+            second_square = utils.get_cords_under_mouse(current_turn)
             selected_square = start_square
             start_square = None
     if selected_square is not None:
         col, row = selected_square
-        rect = pygame.Rect(col * 80, row * 80, 80, 80)
-        pygame.draw.rect(screen, (255, 0, 0), rect, 3)
+        if current_turn == "white":
+            rect = pygame.Rect(col * 80, row * 80, 80, 80)
+            pygame.draw.rect(screen, (255, 0, 0), rect, 3)
+        elif current_turn == "black":
+            new_col = 7 - col
+            new_row = 7 - row
+            rect = pygame.Rect(new_col * 80, new_row * 80, 80, 80)
+            pygame.draw.rect(screen, (255, 0, 0), rect, 3)
 
         if selected_square in board and current_turn in board[selected_square]:
             # Logika pionka
@@ -227,10 +233,18 @@ while running:
                     elif current_turn == "black":
                         current_turn = "white"
 
-    # Tutaj renderujemy wszystkie figury
-    for i in board:
-        col, row = i
-        piece.draw(screen, board[i], (col * 80, row * 80))
+    # Tutaj renderujemy wszystkie figury, w zależności od tury
+    if current_turn == "white":
+        for i in board:
+            col, row = i
+            piece.draw(screen, board[i], (col * 80, row * 80))
+    elif current_turn == "black":
+        for i in board:
+            col, row = i
+            new_col = 7 - col
+            new_row = 7 - row
+            piece.draw(screen, board[i], (new_col * 80, new_row * 80))
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
