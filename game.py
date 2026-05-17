@@ -1,7 +1,7 @@
 import pygame
 from utils import Utils
 from piece import Piece
-utils = Utils()
+from chess import Game
 pygame.init()
 
 # Tworzymy sobie ekran
@@ -19,47 +19,12 @@ second_square = None
 # Tworzymy zmienną do przechowywania pozycji startowej po resecie
 selected_square = None
 
-# Tworzymy zmienną do przechowywania aktualnego ruchu
-current_turn = "white"
-
-board = {
-    (0, 0): "black_rook",
-    (1, 0): "black_knight",
-    (2, 0): "black_bishop",
-    (3, 0): "black_queen",
-    (4, 0): "black_king",
-    (5, 0): "black_bishop",
-    (6, 0): "black_knight",
-    (7, 0): "black_rook",
-    (0, 1): "black_pawn",
-    (1, 1): "black_pawn",
-    (2, 1): "black_pawn",
-    (3, 1): "black_pawn",
-    (4, 1): "black_pawn",
-    (5, 1): "black_pawn",
-    (6, 1): "black_pawn",
-    (7, 1): "black_pawn",
-    (0, 7): "white_rook",
-    (1, 7): "white_knight",
-    (2, 7): "white_bishop",
-    (3, 7): "white_queen",
-    (4, 7): "white_king",
-    (5, 7): "white_bishop",
-    (6, 7): "white_knight",
-    (7, 7): "white_rook",
-    (0, 6): "white_pawn",
-    (1, 6): "white_pawn",
-    (2, 6): "white_pawn",
-    (3, 6): "white_pawn",
-    (4, 6): "white_pawn",
-    (5, 6): "white_pawn",
-    (6, 6): "white_pawn",
-    (7, 6): "white_pawn",
-
-}
-
+# Tutaj wywołujemy wszystkie potrzebne klasy
 piece = Piece("./res/pieces.png", 6, 2)
+game = Game()
+utils = Utils()
 
+# Główna pętla gry
 running = True
 while running:
     # RGB = Red, Green, Blue (ustawimy kolor tła)
@@ -70,181 +35,38 @@ while running:
     # Tutaj mamy pętle która zaczyna się od sprawdzenia czy użytkownik używa lewego przycisky myszy
     if utils.left_click_event():
         if start_square is None:
-            start_square = utils.get_cords_under_mouse(current_turn)
+            start_square = utils.get_cords_under_mouse(game.turn)
         else:
             # Tutaj zapisujemy sobie koordynaty myszy
-            second_square = utils.get_cords_under_mouse(current_turn)
+            second_square = utils.get_cords_under_mouse(game.turn)
             selected_square = start_square
             start_square = None
     if selected_square is not None:
         col, row = selected_square
-        if current_turn == "white":
+        if game.turn == "white":
             rect = pygame.Rect(col * 80, row * 80, 80, 80)
             pygame.draw.rect(screen, (255, 0, 0), rect, 3)
-        elif current_turn == "black":
+        elif game.turn == "black":
             new_col = 7 - col
             new_row = 7 - row
             rect = pygame.Rect(new_col * 80, new_row * 80, 80, 80)
             pygame.draw.rect(screen, (255, 0, 0), rect, 3)
 
-        if selected_square in board and current_turn in board[selected_square]:
-            # Logika pionka
-            if (board[selected_square] == "white_pawn" or board[selected_square] == "black_pawn"):
-                # Tutaj analizujemy dwa przypadki jeden dla białego drugi dla czarnego pionka
-                if board[selected_square] == "white_pawn":
-                    direction = -1
-                else:
-                    direction = 1
-                # Tutaj również analizujemy dwa przypadki jeden dla ruchu startowego o 2 pola, a także ten standardowy o 1 pole
-                if (second_square == (col, row + direction) or (second_square == (col, row + direction * 2) and (row == 6 or row == 1) and (col, row + direction) not in board)) and second_square not in board:
-                    col, row = second_square
-                    piece.draw(screen, board[selected_square], (col * 80, row * 80))
-                    board[second_square] = board[selected_square]
-                    del board[selected_square]
-                    if current_turn == "white":
-                        current_turn = "black"
-                    elif current_turn == "black":
-                        current_turn = "white"
-                elif ((second_square == (col +1, row + direction)) or (second_square == (col -1, row + direction))) and (second_square in board) and not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square])):
-                    col, row = second_square
-                    piece.draw(screen, board[selected_square], (col * 80, row * 80))
-                    board[second_square] = board[selected_square]
-                    del board[selected_square]
-                    if current_turn == "white":
-                        current_turn = "black"
-                    elif current_turn == "black":
-                        current_turn = "white"
-            # Logika wierzy
-            elif (board[selected_square] == "white_rook" or board[selected_square] == "black_rook") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
-                # Tutaj sprawdzamy czy wiersz lub kolumna zgadza się z pozycją wierzy
-                col2, row2 = second_square
-
-                # Tutaj iterujemy sobie przez wszystkie pola między wierzą a punktem docelowym, najpierw w przypadku kiedy ruch ma się odbyć w prawo lub w lewo
-                if col == col2:
-                    for c in range(min(row, row2) +1, max(row, row2)):
-                        if (col, c) in board:
-                            break
-                    else:
-                        piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
-                        board[second_square] = board[selected_square]
-                        del board[selected_square]
-                        if current_turn == "white":
-                            current_turn = "black"
-                        elif current_turn == "black":
-                            current_turn = "white"
-                # Tu analizujemy opcję w której wierza porusza się w górę lub w dół
-                elif row == row2:
-                    for c in range(min(col, col2) +1, max(col, col2)):
-                        if (c, row) in board:
-                            break
-                    else:
-                        piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
-                        board[second_square] = board[selected_square]
-                        del board[selected_square]
-                        if current_turn == "white":
-                            current_turn = "black"
-                        elif current_turn == "black":
-                            current_turn = "white"
-            # Logika skoczka
-            elif (board[selected_square] == "white_knight" or board[selected_square] == "black_knight") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
-                col2, row2 = second_square
-
-                if (col2, row2) == (col +2, row +1) or (col2, row2) == (col +2, row -1) or (col2, row2) == (col + 1, row +2) or (col2, row2) == (col-1, row +2) or (col2, row2) == (col +1, row -2) or (col2, row2) == (col-1, row -2) or (col2, row2) == (col-2, row +1) or (col2, row2) == (col-2, row -1):
-                    piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
-                    board[second_square] = board[selected_square]
-                    del board[selected_square]
-                    if current_turn == "white":
-                        current_turn = "black"
-                    elif current_turn == "black":
-                        current_turn = "white"
-            # Logika gońca
-            elif (board[selected_square] == "white_bishop" or board[selected_square] == "black_bishop") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
-                col2, row2 = second_square
-                # Tutaj obliczmy sobię kierunek ruchu
-                d_col = (col2 - col) // abs(col2 - col)
-                d_row = (row2 - row) // abs(row2 - row)
-
-                # Tutaj korzystamy z funkcji abs(x) która podaję nam wartość bezwzględną danej liczby, co w tym przypadku wykorzystujemy do obliczenia wartości bezwzględnej z różnicy col2 - col1 i row2 - row, co pozwala nam potem sprawdzić czy ich różnica jest sobie równa
-                if abs(col2 - col) == abs(row2 - row):
-                    # Tutaj iterujemy sobie przez wszystkie pola między polem docelowym a startowym, z wykorzystaniem funkcji zip, która łaczy nam iterowalne elementy, w tym przypadku pierwsza wartość to punkt startowy + kierunek kolumny, druga wartość to punkt końcowy a trzecia, to o ile się poruszamy, analogiczną sytuację mamy w rzędach
-                    for c, r in zip(range(col + d_col, col2, d_col), range(row + d_row, row2, d_row)):
-                        if (c, r) in board:
-                            break
-                    else:
-                        piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
-                        board[second_square] = board[selected_square]
-                        del board[selected_square]
-                        if current_turn == "white":
-                            current_turn = "black"
-                        elif current_turn == "black":
-                            current_turn = "white"
-            # Logika hetmana
-            elif (board[selected_square] == "white_queen" or board[selected_square] == "black_queen") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
-                col2, row2 = second_square
-
-                if abs(col2 - col) == abs(row2 - row):
-                    d_col = (col2 - col) // abs(col2 - col)
-                    d_row = (row2 - row) // abs(row2 - row)
-                    for c, r in zip(range(col + d_col, col2, d_col), range(row + d_row, row2, d_row)):
-                        if (c, r) in board:
-                            break
-                    else:
-                        piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
-                        board[second_square] = board[selected_square]
-                        del board[selected_square]
-                        if current_turn == "white":
-                            current_turn = "black"
-                        elif current_turn == "black":
-                            current_turn = "white"
-                elif row == row2:
-                    for c in range(min(col, col2) + 1, max(col, col2)):
-                        if (c, row) in board:
-                            break
-                    else:
-                        piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
-                        board[second_square] = board[selected_square]
-                        del board[selected_square]
-                        if current_turn == "white":
-                            current_turn = "black"
-                        elif current_turn == "black":
-                            current_turn = "white"
-                elif col == col2:
-                    for c in range(min(row, row2) + 1, max(row, row2)):
-                        if (col, c) in board:
-                            break
-                    else:
-                        piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
-                        board[second_square] = board[selected_square]
-                        del board[selected_square]
-                        if current_turn == "white":
-                            current_turn = "black"
-                        elif current_turn == "black":
-                            current_turn = "white"
-            # Logika króla
-            elif (board[selected_square] == "white_king" or board[selected_square] == "black_king") and (second_square not in board or not (("white" in board[selected_square] and "white" in board[second_square]) or ("black" in board[selected_square] and "black" in board[second_square]))):
-                col2, row2 = second_square
-
-                if (col2, row2) == (col, row +1) or (col2, row2) == (col +1, row +1) or (col2, row2) == (col +1, row) or (col2, row2) == (col +1, row -1) or (col2, row2) == (col, row -1) or (col2, row2) == (col-1, row -1) or (col2, row2) == (col-1, row) or (col2, row2) == (col-1, row +1):
-                    piece.draw(screen, board[selected_square], (col2 * 80, row2 * 80))
-                    board[second_square] = board[selected_square]
-                    del board[selected_square]
-                    if current_turn == "white":
-                        current_turn = "black"
-                    elif current_turn == "black":
-                        current_turn = "white"
-
+        if selected_square in game.board and game.turn in game.board[selected_square]:
+            if game.can_move(selected_square, second_square):
+                game.make_move(selected_square, second_square)
+                game.switch_turn()
     # Tutaj renderujemy wszystkie figury, w zależności od tury
-    if current_turn == "white":
-        for i in board:
+    if game.turn == "white":
+        for i in game.board:
             col, row = i
-            piece.draw(screen, board[i], (col * 80, row * 80))
-    elif current_turn == "black":
-        for i in board:
+            piece.draw(screen, game.board[i], (col * 80, row * 80))
+    elif game.turn == "black":
+        for i in game.board:
             col, row = i
             new_col = 7 - col
             new_row = 7 - row
-            piece.draw(screen, board[i], (new_col * 80, new_row * 80))
-
+            piece.draw(screen, game.board[i], (new_col * 80, new_row * 80))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
