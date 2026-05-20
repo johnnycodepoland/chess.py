@@ -127,14 +127,33 @@ class Game:
                 can_move = True
         return can_move
 
+    # Funkcja zmieniająca tury
     def switch_turn(self):
         if self.turn == "white":
             self.turn = "black"
         elif self.turn == "black":
             self.turn = "white"
 
+    # Funkcja wykonująca ruch
     def make_move(self, selected_square, second_square):
-        col, row = selected_square
-
+        self.captured = self.board.get(second_square)
         self.board[second_square] = self.board[selected_square]
         del self.board[selected_square]
+
+    # Funkcja sprawdzająca czy król jest pod szachem
+    def is_in_check(self, color):
+        for location in self.board:
+            if self.board[location] == color + "_king":
+                king_pos = location
+                break
+        for piece in self.board:
+            if color not in self.board[piece]:
+                if self.can_move(piece, king_pos):
+                    return True
+        return False
+
+    def undo_move(self, selected_square, second_square):
+        self.board[selected_square] = self.board[second_square]
+        del self.board[second_square]
+        if self.captured: # jeśli figura została zbita
+            self.board[second_square] = self.board[self.captured] # przywracamy ją

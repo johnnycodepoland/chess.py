@@ -55,7 +55,10 @@ while running:
         if selected_square in game.board and game.turn in game.board[selected_square]:
             if game.can_move(selected_square, second_square):
                 game.make_move(selected_square, second_square)
-                game.switch_turn()
+                if game.is_in_check(game.turn):
+                    game.undo_move(selected_square, second_square)
+                else:
+                    game.switch_turn()
     # Tutaj renderujemy wszystkie figury, w zależności od tury
     if game.turn == "white":
         for i in game.board:
