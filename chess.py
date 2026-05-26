@@ -1,4 +1,4 @@
-class Game:
+class Chess:
     def __init__(self):
         self.board = {
             (0, 0): "black_rook",
@@ -83,12 +83,12 @@ class Game:
         # Logika gońca
         elif (self.board[selected_square] == "white_bishop" or self.board[selected_square] == "black_bishop") and (second_square not in self.board or not (("white" in self.board[selected_square] and "white" in self.board[second_square]) or ("black" in self.board[selected_square] and "black" in self.board[second_square]))):
             col2, row2 = second_square
-            # Tutaj obliczmy sobię kierunek ruchu
-            d_col = (col2 - col) // abs(col2 - col)
-            d_row = (row2 - row) // abs(row2 - row)
 
             # Tutaj korzystamy z funkcji abs(x) która podaję nam wartość bezwzględną danej liczby, co w tym przypadku wykorzystujemy do obliczenia wartości bezwzględnej z różnicy col2 - col1 i row2 - row, co pozwala nam potem sprawdzić czy ich różnica jest sobie równa
             if abs(col2 - col) == abs(row2 - row):
+                # Tutaj obliczmy sobię kierunek ruchu
+                d_col = (col2 - col) // abs(col2 - col)
+                d_row = (row2 - row) // abs(row2 - row)
                 # Tutaj iterujemy sobie przez wszystkie pola między polem docelowym a startowym, z wykorzystaniem funkcji zip, która łaczy nam iterowalne elementy, w tym przypadku pierwsza wartość to punkt startowy + kierunek kolumny, druga wartość to punkt końcowy a trzecia, to o ile się poruszamy, analogiczną sytuację mamy w rzędach
                 for c, r in zip(range(col + d_col, col2, d_col), range(row + d_row, row2, d_row)):
                     if (c, r) in self.board:
@@ -140,7 +140,7 @@ class Game:
         self.board[second_square] = self.board[selected_square]
         del self.board[selected_square]
 
-    # Funkcja sprawdzająca czy król jest pod szachem
+    # Funkcja sprawdzająca, czy król jest pod szachem
     def is_in_check(self, color):
         for location in self.board:
             if self.board[location] == color + "_king":
@@ -152,8 +152,37 @@ class Game:
                     return True
         return False
 
+    # Funkcja cofająca ruch
     def undo_move(self, selected_square, second_square):
         self.board[selected_square] = self.board[second_square]
         del self.board[second_square]
         if self.captured: # jeśli figura została zbita
-            self.board[second_square] = self.board[self.captured] # przywracamy ją
+            self.board[second_square] = self.captured # przywracamy ją
+
+    # Funkcja sprawdzająca, czy mamy do czynienia z matem
+    def is_checkmate(self, color):
+        moves = [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]
+
+        for location in self.board:
+            if self.board[location] == color + "_king":
+                king_pos = location
+                break
+        for move in moves:
+            move = king_pos[0] + move[0], king_pos[1] + move[1]
+            if self.can_move(king_pos, move) and move in self.board:
+                self.make_move(king_pos, move)
+                if not self.is_in_check(color):
+                    self.undo_move(king_pos, move)
+                    return False
+                self.undo_move(king_pos, move)
+        for piece in self.board:
+            if color in self.board[piece]:
+                for col in range(8):
+                    for row in range(8):
+                        if self.can_move(piece, (col, row)):
+                            self.make_move(piece, (col, row))
+                            if not self.is_in_check(color):
+                                self.undo_move(piece, (col, row))
+                                return False
+                            self.undo_move(piece, (col, row))
+        return True

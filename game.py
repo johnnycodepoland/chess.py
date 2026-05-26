@@ -1,7 +1,7 @@
 import pygame
 from utils import Utils
 from piece import Piece
-from chess import Game
+from chess import Chess
 pygame.init()
 
 # Tworzymy sobie ekran
@@ -21,7 +21,7 @@ selected_square = None
 
 # Tutaj wywołujemy wszystkie potrzebne klasy
 piece = Piece("./res/pieces.png", 6, 2)
-game = Game()
+chess = Chess()
 utils = Utils()
 
 # Główna pętla gry
@@ -35,41 +35,45 @@ while running:
     # Tutaj mamy pętle która zaczyna się od sprawdzenia czy użytkownik używa lewego przycisky myszy
     if utils.left_click_event():
         if start_square is None:
-            start_square = utils.get_cords_under_mouse(game.turn)
+            start_square = utils.get_cords_under_mouse(chess.turn)
         else:
             # Tutaj zapisujemy sobie koordynaty myszy
-            second_square = utils.get_cords_under_mouse(game.turn)
+            second_square = utils.get_cords_under_mouse(chess.turn)
             selected_square = start_square
             start_square = None
     if selected_square is not None:
         col, row = selected_square
-        if game.turn == "white":
+        if chess.turn == "white":
             rect = pygame.Rect(col * 80, row * 80, 80, 80)
             pygame.draw.rect(screen, (255, 0, 0), rect, 3)
-        elif game.turn == "black":
+        elif chess.turn == "black":
             new_col = 7 - col
             new_row = 7 - row
             rect = pygame.Rect(new_col * 80, new_row * 80, 80, 80)
             pygame.draw.rect(screen, (255, 0, 0), rect, 3)
 
-        if selected_square in game.board and game.turn in game.board[selected_square]:
-            if game.can_move(selected_square, second_square):
-                game.make_move(selected_square, second_square)
-                if game.is_in_check(game.turn):
-                    game.undo_move(selected_square, second_square)
+        if selected_square in chess.board and chess.turn in chess.board[selected_square]:
+            if chess.can_move(selected_square, second_square):
+                chess.make_move(selected_square, second_square)
+                if chess.is_in_check(chess.turn):
+                    chess.undo_move(selected_square, second_square)
                 else:
-                    game.switch_turn()
+                    chess.switch_turn()
+                    if chess.is_checkmate(chess.turn):
+                        chess.switch_turn()
+                        print(f"Wygrywa", chess.turn)
+                        running = False
     # Tutaj renderujemy wszystkie figury, w zależności od tury
-    if game.turn == "white":
-        for i in game.board:
+    if chess.turn == "white":
+        for i in chess.board:
             col, row = i
-            piece.draw(screen, game.board[i], (col * 80, row * 80))
-    elif game.turn == "black":
-        for i in game.board:
+            piece.draw(screen, chess.board[i], (col * 80, row * 80))
+    elif chess.turn == "black":
+        for i in chess.board:
             col, row = i
             new_col = 7 - col
             new_row = 7 - row
-            piece.draw(screen, game.board[i], (new_col * 80, new_row * 80))
+            piece.draw(screen, chess.board[i], (new_col * 80, new_row * 80))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
