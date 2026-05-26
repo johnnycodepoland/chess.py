@@ -57,17 +57,17 @@ class Chess:
                 can_move = True
         # Logika wierzy
         elif (self.board[selected_square] == "white_rook" or self.board[selected_square] == "black_rook") and (second_square not in self.board or not (("white" in self.board[selected_square] and "white" in self.board[second_square]) or ("black" in self.board[selected_square] and "black" in self.board[second_square]))):
-            # Tutaj sprawdzamy czy wiersz lub kolumna zgadza się z pozycją wierzy
+            # Tutaj sprawdzamy, czy wiersz lub kolumna zgadza się z pozycją wierzy
             col2, row2 = second_square
 
-            # Tutaj iterujemy sobie przez wszystkie pola między wierzą a punktem docelowym, najpierw w przypadku kiedy ruch ma się odbyć w prawo lub w lewo
+            # Tutaj iterujemy sobie przez wszystkie pola między wierzą, a punktem docelowym, najpierw w przypadku kiedy ruch ma się odbyć w prawo lub w lewo
             if col == col2:
                 for c in range(min(row, row2) +1, max(row, row2)):
                     if (col, c) in self.board:
                         break
                 else:
                     can_move = True
-            # Tu analizujemy opcję w której wierza porusza się w górę lub w dół
+            # Tu analizujemy opcję, poruszania się w górę lub w dół
             elif row == row2:
                 for c in range(min(col, col2) +1, max(col, col2)):
                     if (c, row) in self.board:
@@ -84,7 +84,7 @@ class Chess:
         elif (self.board[selected_square] == "white_bishop" or self.board[selected_square] == "black_bishop") and (second_square not in self.board or not (("white" in self.board[selected_square] and "white" in self.board[second_square]) or ("black" in self.board[selected_square] and "black" in self.board[second_square]))):
             col2, row2 = second_square
 
-            # Tutaj korzystamy z funkcji abs(x) która podaję nam wartość bezwzględną danej liczby, co w tym przypadku wykorzystujemy do obliczenia wartości bezwzględnej z różnicy col2 - col1 i row2 - row, co pozwala nam potem sprawdzić czy ich różnica jest sobie równa
+            # Tutaj korzystamy z funkcji abs(x) która podaję nam wartość bezwzględną danej liczby, co w tym przypadku wykorzystujemy do obliczenia wartości bezwzględnej z różnicy col2 - col1 i row2 - row, co pozwala nam potem sprawdzić, czy ich różnica jest sobie równa
             if abs(col2 - col) == abs(row2 - row):
                 # Tutaj obliczmy sobię kierunek ruchu
                 d_col = (col2 - col) // abs(col2 - col)
@@ -186,3 +186,17 @@ class Chess:
                                 return False
                             self.undo_move(piece, (col, row))
         return True
+    
+    # Funkcja wykonująca cały ruch gracza
+    def play_turn(self, selected_square, second_square):
+        if selected_square in self.board and self.turn in self.board[selected_square]:
+            if self.can_move(selected_square, second_square):
+                self.make_move(selected_square, second_square)
+                if self.is_in_check(self.turn):
+                    self.undo_move(selected_square, second_square)
+                else:
+                    self.switch_turn()
+                    if self.is_checkmate(self.turn):
+                        self.switch_turn()
+                        return True
+        return False
