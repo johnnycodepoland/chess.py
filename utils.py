@@ -2,11 +2,11 @@ import pygame
 
 class Utils:
     def left_click_event(self):
-        # Tutaj sprawdzamy czy mysz została naciśnięta
+        # Tutaj sprawdzamy, czy mysz została naciśnięta
         mouse_button = pygame.mouse.get_pressed()
 
         left_click = False
-        # Tutaj sprawdzamy czy kliknięty przycisk myszki jest lewy
+        # Tutaj sprawdzamy, czy kliknięty przycisk myszki jest lewy
         if mouse_button[0]:
             # Zmieniamy flagę
             left_click = True

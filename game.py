@@ -56,8 +56,12 @@ class Game:
                     new_row = 7 - row
                     rect = pygame.Rect(new_col * 80, new_row * 80, 80, 80)
                     pygame.draw.rect(self.screen, (255, 0, 0), rect, 3)
-                if self.chess.play_turn(self.selected_square, self.second_square):
-                    print(f"Wygrywa", self.chess.turn)
+                result = self.chess.play_turn(self.selected_square, self.second_square)
+                if result == "Checkmate":
+                    print(f"Gracz {self.chess.turn} wygrywa!")
+                    running = False
+                elif result == "Stalemate":
+                    print("Remis")
                     running = False
 
             # Tutaj renderujemy wszystkie figury, w zależności od tury

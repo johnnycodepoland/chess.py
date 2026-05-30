@@ -37,6 +37,23 @@ class Chess:
         # Tworzymy zmienną do przechowywania aktualnego ruchu
         self.turn = "white"
 
+        # Tworzymy zmienną do przechowywania adresu pola, zbitej figury
+        self.captured = None
+
+        # Tworzymy zmienne do przechowywania informacji o tym, czy dany król wykonał już jakiś ruch
+        self.white_king = False
+
+        self.black_king = False
+
+        # Tworzymy zmienne do przechowywania informacji o tym, czy dana wieża wykonała już jakiś ruch
+        self.white_rook_left_corner = False
+
+        self.white_rook_right_corner = False
+
+        self.black_rook_left_corner = False
+
+        self.black_rook_right_corner = False
+
     def can_move(self, selected_square, second_square):
         col, row = selected_square
         can_move = False
@@ -186,9 +203,40 @@ class Chess:
                                 return False
                             self.undo_move(piece, (col, row))
         return True
-    
+
+    def is_stalemate(self, color):
+        moves = [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]
+
+        if self.is_in_check(color):
+            return False
+        for location in self.board:
+            if self.board[location] == color + "_king":
+                king_pos = location
+                break
+        for move in moves:
+            move = king_pos[0] + move[0], king_pos[1] + move[1]
+            if self.can_move(king_pos, move) and move in self.board:
+                self.make_move(king_pos, move)
+                if not self.is_in_check(color):
+                    self.undo_move(king_pos, move)
+                    return False
+                self.undo_move(king_pos, move)
+        for piece in self.board:
+            if color in self.board[piece]:
+                for col in range(8):
+                    for row in range(8):
+                        if self.can_move(piece, (col, row)):
+                            self.make_move(piece, (col, row))
+                            if not self.is_in_check(color):
+                                self.undo_move(piece, (col, row))
+                                return False
+                            self.undo_move(piece, (col, row))
+        return True
+
     # Funkcja wykonująca cały ruch gracza
     def play_turn(self, selected_square, second_square):
+        result = ""
+
         if selected_square in self.board and self.turn in self.board[selected_square]:
             if self.can_move(selected_square, second_square):
                 self.make_move(selected_square, second_square)
@@ -198,5 +246,10 @@ class Chess:
                     self.switch_turn()
                     if self.is_checkmate(self.turn):
                         self.switch_turn()
-                        return True
+                        result = "Checkmate"
+                        return result
+                    elif self.is_stalemate(self.turn):
+                        self.switch_turn()
+                        result = "Stalemate"
+                        return result
         return False
