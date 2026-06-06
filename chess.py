@@ -136,6 +136,15 @@ class Chess:
                         break
                 else:
                     can_move = True
+        # Logika roszady, dla każdej z czterech możliwości
+        elif self.board[selected_square] == "white_king" and second_square == (6, 7) and self.white_king is False and self.white_rook_right_corner is False and (5, 7) not in self.board and (6, 7) not in self.board and self.is_square_in_check(self.turn, (5, 7)) is False and self.is_square_in_check(self.turn, (6, 7)) is False:
+            can_move = True
+        elif self.board[selected_square] == "white_king" and second_square == (2, 7) and self.white_king is False and self.white_rook_left_corner is False and (1, 7) not in self.board and (2, 7) not in self.board and (3, 7) not in self.board and self.is_square_in_check(self.turn, (1, 7)) is False and self.is_square_in_check(self.turn, (2, 7)) is False and self.is_square_in_check(self.turn, (3, 7)) is False:
+            can_move = True
+        elif self.board[selected_square] == "black_king" and second_square == (6, 0) and self.black_king is False and self.black_rook_right_corner is False and (5, 0) not in self.board and (6, 0) not in self.board and self.is_square_in_check(self.turn, (5, 0)) is False and self.is_square_in_check(self.turn, (6, 0)) is False:
+            can_move = True
+        elif self.board[selected_square] == "black_king" and second_square == (2, 0) and self.black_king is False and self.black_rook_left_corner is False and (1, 0) not in self.board and (2, 0) not in self.board and (3, 0) not in self.board and self.is_square_in_check(self.turn, (1, 0)) is False and self.is_square_in_check(self.turn, (2, 0)) is False and self.is_square_in_check(self.turn, (3, 0)) is False:
+            can_move = True
         # Logika króla
         elif (self.board[selected_square] == "white_king" or self.board[selected_square] == "black_king") and (second_square not in self.board or not (("white" in self.board[selected_square] and "white" in self.board[second_square]) or ("black" in self.board[selected_square] and "black" in self.board[second_square]))):
             col2, row2 = second_square
@@ -153,6 +162,18 @@ class Chess:
 
     # Funkcja wykonująca ruch
     def make_move(self, selected_square, second_square):
+        if self.board[selected_square] == "white_king":
+            self.white_king = True
+        elif self.board[selected_square] == "black_king":
+            self.black_king = True
+        elif self.board[selected_square] == "black_rook" and second_square == (7, 0):
+            self.black_rook_right_corner = True
+        elif self.board[selected_square] == "black_rook" and second_square == (0, 0):
+            self.black_rook_left_corner = True
+        elif self.board[selected_square] == "white_rook" and second_square == (7, 7):
+            self.white_rook_right_corner = True
+        elif self.board[selected_square] == "white_rook" and second_square == (0, 7):
+            self.white_rook_left_corner = True
         self.captured = self.board.get(second_square)
         self.board[second_square] = self.board[selected_square]
         del self.board[selected_square]
@@ -169,8 +190,28 @@ class Chess:
                     return True
         return False
 
+    # Funkcja sprawdzająca, czy dane pole jest atakowane
+    def is_square_in_check(self, color, square):
+        for piece in self.board:
+            if color not in self.board[piece]:
+                if self.can_move(piece, square):
+                    return True
+        return False
+
     # Funkcja cofająca ruch
     def undo_move(self, selected_square, second_square):
+        if self.board[second_square] == "white_king":
+            self.white_king = False
+        elif self.board[second_square] == "black_king":
+            self.black_king = False
+        elif self.board[second_square] == "black_rook" and second_square == (7, 0):
+            self.black_rook_right_corner = False
+        elif self.board[second_square] == "black_rook" and second_square == (0, 0):
+            self.black_rook_left_corner = False
+        elif self.board[second_square] == "white_rook" and second_square == (7, 7):
+            self.white_rook_right_corner = False
+        elif self.board[second_square] == "white_rook" and second_square == (0, 7):
+            self.white_rook_left_corner = False
         self.board[selected_square] = self.board[second_square]
         del self.board[second_square]
         if self.captured: # jeśli figura została zbita
@@ -243,6 +284,18 @@ class Chess:
                 if self.is_in_check(self.turn):
                     self.undo_move(selected_square, second_square)
                 else:
+                    if self.board[second_square] == "white_king" and second_square == (6, 7):
+                        self.board[(5, 7)] = self.board[(7, 7)]
+                        del self.board[(7, 7)]
+                    if self.board[second_square] == "white_king" and second_square == (2, 7):
+                        self.board[(3, 7)] = self.board[(0, 7)]
+                        del self.board[(0, 7)]
+                    if self.board[second_square] == "black_king" and second_square == (6, 0):
+                        self.board[(5, 0)] = self.board[(7, 0)]
+                        del self.board[(7, 0)]
+                    if self.board[second_square] == "black_king" and second_square == (2, 0):
+                        self.board[(3, 0)] = self.board[(0, 0)]
+                        del self.board[(0, 0)]
                     self.switch_turn()
                     if self.is_checkmate(self.turn):
                         self.switch_turn()
