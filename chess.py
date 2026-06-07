@@ -277,6 +277,7 @@ class Chess:
     # Funkcja wykonująca cały ruch gracza
     def play_turn(self, selected_square, second_square):
         result = ""
+        col, row = second_square
 
         if selected_square in self.board and self.turn in self.board[selected_square]:
             if self.can_move(selected_square, second_square):
@@ -284,18 +285,36 @@ class Chess:
                 if self.is_in_check(self.turn):
                     self.undo_move(selected_square, second_square)
                 else:
+                    # Warunki do roszady
                     if self.board[second_square] == "white_king" and second_square == (6, 7):
                         self.board[(5, 7)] = self.board[(7, 7)]
                         del self.board[(7, 7)]
-                    if self.board[second_square] == "white_king" and second_square == (2, 7):
+                    elif self.board[second_square] == "white_king" and second_square == (2, 7):
                         self.board[(3, 7)] = self.board[(0, 7)]
                         del self.board[(0, 7)]
-                    if self.board[second_square] == "black_king" and second_square == (6, 0):
+                    elif self.board[second_square] == "black_king" and second_square == (6, 0):
                         self.board[(5, 0)] = self.board[(7, 0)]
                         del self.board[(7, 0)]
-                    if self.board[second_square] == "black_king" and second_square == (2, 0):
+                    elif self.board[second_square] == "black_king" and second_square == (2, 0):
                         self.board[(3, 0)] = self.board[(0, 0)]
                         del self.board[(0, 0)]
+                    # Warunek do promocji pionka
+                    if (self.board[second_square] == "white_pawn" and row == 0) or (self.board[second_square] == "black_pawn" and row == 7):
+                        color = self.board[second_square].split("_")[0]
+                        while True:
+                            piece = input("Podaj nazwę figury (hetman, wierza, goniec, skoczek): ")
+                            if piece == "hetman":
+                                self.board[second_square] = color +"_queen"
+                                break
+                            elif piece == "wierza":
+                                self.board[second_square] = color +"_rook"
+                                break
+                            elif piece == "goniec":
+                                self.board[second_square] = color + "_bishop"
+                                break
+                            elif piece == "skoczek":
+                                self.board[second_square] = color + "_knight"
+                                break
                     self.switch_turn()
                     if self.is_checkmate(self.turn):
                         self.switch_turn()
