@@ -54,12 +54,21 @@ class Chess:
 
         self.black_rook_right_corner = False
 
+        # Tworzymy zmienną do przechowywania pozycji pionka, który wykonuje podwójny ruch, co przyda nam się do bicia w przelocie, a także zmienną do przechowywania poprzedniej lokalizacji figury, która została zbita
+        self.en_passant_location = None
+
+        self.previous_en_passant_location = None
+
     def can_move(self, selected_square, second_square):
         col, row = selected_square
         can_move = False
-
+        # Logika bicia w przelocie
+        if self.board[selected_square] == "white_pawn" and self.en_passant_location is not None and (self.en_passant_location == (col - 1, row) or self.en_passant_location == (col + 1, row)) and second_square == (self.en_passant_location[0], self.en_passant_location[1] - 1):
+            can_move = True
+        elif self.board[selected_square] == "black_pawn" and self.en_passant_location is not None and (self.en_passant_location == (col - 1, row) or self.en_passant_location == (col + 1, row)) and second_square == (self.en_passant_location[0], self.en_passant_location[1] + 1):
+            can_move = True
         # Logika pionka
-        if (self.board[selected_square] == "white_pawn" or self.board[selected_square] == "black_pawn"):
+        elif self.board[selected_square] == "white_pawn" or self.board[selected_square] == "black_pawn":
             # Tutaj analizujemy dwa przypadki jeden dla białego drugi dla czarnego pionka
             if self.board[selected_square] == "white_pawn":
                 direction = -1
@@ -162,6 +171,10 @@ class Chess:
 
     # Funkcja wykonująca ruch
     def make_move(self, selected_square, second_square):
+        col, row = selected_square
+        self.previous_en_passant_location = self.en_passant_location
+
+        # Warunki do roszady
         if self.board[selected_square] == "white_king":
             self.white_king = True
         elif self.board[selected_square] == "black_king":
@@ -174,6 +187,13 @@ class Chess:
             self.white_rook_right_corner = True
         elif self.board[selected_square] == "white_rook" and second_square == (0, 7):
             self.white_rook_left_corner = True
+        # Warunki do bicia w przelocie
+        if self.board[selected_square] == "white_pawn" and second_square == (col, row - 2):
+            self.en_passant_location = second_square
+        elif self.board[selected_square] == "black_pawn" and second_square == (col, row + 2):
+            self.en_passant_location = second_square
+        else:
+            self.en_passant_location = None
         self.captured = self.board.get(second_square)
         self.board[second_square] = self.board[selected_square]
         del self.board[selected_square]
@@ -216,6 +236,7 @@ class Chess:
         del self.board[second_square]
         if self.captured: # jeśli figura została zbita
             self.board[second_square] = self.captured # przywracamy ją
+        self.en_passant_location = self.previous_en_passant_location
 
     # Funkcja sprawdzająca, czy mamy do czynienia z matem
     def is_checkmate(self, color):
@@ -278,6 +299,7 @@ class Chess:
     def play_turn(self, selected_square, second_square):
         result = ""
         col, row = second_square
+        en_passant_before = self.previous_en_passant_location
 
         if selected_square in self.board and self.turn in self.board[selected_square]:
             if self.can_move(selected_square, second_square):
@@ -315,6 +337,9 @@ class Chess:
                             elif piece == "skoczek":
                                 self.board[second_square] = color + "_knight"
                                 break
+                    # Warunek do bicia w przelocie
+                    if en_passant_before is not None and (second_square == (en_passant_before[0], en_passant_before[1] - 1) or second_square == (en_passant_before[0], en_passant_before[1] + 1)):
+                        del self.board[en_passant_before]
                     self.switch_turn()
                     if self.is_checkmate(self.turn):
                         self.switch_turn()
